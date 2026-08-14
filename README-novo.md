@@ -7,6 +7,8 @@ Aplicação full stack composta por:
 - **Backend**: API em Laravel 12 (PHP 8.2) responsável pela autenticação e pelo gerenciamento de usuários e perfis, com relacionamento muitos-para-muitos entre eles.
 - **Frontend**: SPA em Vue 3 que consome a API do backend.
 - **Banco de dados**: MySQL 8.4.
+- **Autenticação**: Laravel Sanctum utilizando tokens de acesso.
+- **Documentação da API**: OpenAPI/Swagger através do L5 Swagger.
 
 Toda a stack é orquestrada via Docker Compose, com três serviços:
 
@@ -69,6 +71,7 @@ docker exec -it app_backend php artisan key:generate
 ### 5. Acessar a aplicação
 - Frontend: http://localhost:5173
 - Backend (API): http://localhost:8000/api
+- Swagger: http://localhost:8000/api/documentation
 
 ---
 
