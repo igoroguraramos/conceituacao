@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Interfaces\Http\Controllers;
 use OpenApi\Attributes as OA;
 use App\Application\Auth\UseCases\LoginUseCase;
 use App\Http\Requests\Auth\LoginRequest;

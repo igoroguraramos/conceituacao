@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Domain\Profile\Contracts\ProfileRepositoryInterface;
+use App\Domain\User\Contracts\UserRepositoryInterface;
+use App\Domain\UserProfile\Contracts\UserProfileRepositoryInterface;
+use App\Infrastructure\Persistence\Eloquent\EloquentUserRepository;
+use App\Infrastructure\Persistence\Eloquent\EloquentProfileRepository;
+use App\Infrastructure\Persistence\Eloquent\EloquentUserProfileRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +17,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            UserRepositoryInterface::class,
+            EloquentUserRepository::class
+        );
+        $this->app->bind(
+            ProfileRepositoryInterface::class,
+            EloquentProfileRepository::class
+        );
+        $this->app->bind(
+            UserProfileRepositoryInterface::class,
+            EloquentUserProfileRepository::class
+        );
     }
 
     /**

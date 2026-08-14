@@ -1,14 +1,31 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Interfaces\Http\Controllers;
 
+use App\Application\User\UseCases\CreateUserUseCase;
+use App\Application\User\UseCases\DeleteUserUseCase;
+use App\Application\User\UseCases\GetUserUseCase;
+use App\Application\User\UseCases\ListUsersUseCase;
+use App\Application\User\UseCases\UpdateUserUseCase;
+use App\Interfaces\Http\Requests\User\StoreUserRequest;
+use App\Interfaces\Http\Requests\User\UpdateUserRequest;
+use App\Interfaces\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use OpenApi\Attributes as OA;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private readonly ListUsersUseCase $listUsers,
+        private readonly GetUserUseCase $getUser,
+        private readonly CreateUserUseCase $createUser,
+        private readonly UpdateUserUseCase $updateUser,
+        private readonly DeleteUserUseCase $deleteUser,
+    ) {
+    }
+
     #[OA\Get(
         path: '/api/users',
         summary: 'Lista os usuários',
@@ -27,11 +44,11 @@ class UserController extends Controller
             )
         ]
     )]
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
-        $users = User::with('profiles')->get();
-
-        return response()->json($users);
+        return UserResource::collection(
+            $this->listUsers->execute()
+        );
     }
 
     #[OA\Post(
@@ -55,21 +72,14 @@ class UserController extends Controller
             )
         ]
     )]
-    public function store(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
+    public function store(
+        StoreUserRequest $request
+    ): UserResource {
+        $user = $this->createUser->execute(
+            $request->validated()
+        );
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-        ]);
-
-        return response()->json($user, 201);
+        return new UserResource($user);
     }
 
     #[OA\Get(
@@ -99,11 +109,11 @@ class UserController extends Controller
             )
         ]
     )]
-    public function show(User $user): JsonResponse
+    public function show(User $user): UserResource
     {
-        return response()->json(
-            $user->load('profiles')
-        );
+        $user = $this->getUser->execute($user->id);
+
+        return new UserResource($user);
     }
 
     #[OA\Put(
@@ -147,25 +157,17 @@ class UserController extends Controller
             )
         ]
     )]
+    
     public function update(
-        Request $request,
+        UpdateUserRequest $request,
         User $user
-    ): JsonResponse {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                'unique:users,email,' . $user->id,
-            ],
-        ]);
-
-        $user->update($validated);
-
-        return response()->json(
-            $user->load('profiles')
+    ): UserResource {
+        $user = $this->updateUser->execute(
+            $user,
+            $request->validated()
         );
+
+        return new UserResource($user);
     }
 
     #[OA\Delete(
@@ -198,10 +200,10 @@ class UserController extends Controller
     )]
     public function destroy(User $user): JsonResponse
     {
-        $user->delete();
+        $this->deleteUser->execute($user);
 
-        return response()->json([
-            'message' => 'Usuário excluído com sucesso.',
-        ]);
+        return response()->json(
+            status: 204
+        );
     }
 }

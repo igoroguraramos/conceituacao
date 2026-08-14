@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserProfileController;
+use App\Interfaces\Http\Controllers\AuthController;
+use App\Interfaces\Http\Controllers\ProfileController;
+use App\Interfaces\Http\Controllers\UserProfileController;
+use App\Interfaces\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/hello', function () {

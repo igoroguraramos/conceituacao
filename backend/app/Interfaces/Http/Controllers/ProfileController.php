@@ -1,13 +1,31 @@
 <?php
 
-namespace App\Http\Controllers;
-use OpenApi\Attributes as OA;
+namespace App\Interfaces\Http\Controllers;
+
+use App\Application\Profile\UseCases\CreateProfileUseCase;
+use App\Application\Profile\UseCases\DeleteProfileUseCase;
+use App\Application\Profile\UseCases\GetProfileUseCase;
+use App\Application\Profile\UseCases\ListProfilesUseCase;
+use App\Application\Profile\UseCases\UpdateProfileUseCase;
+use App\Interfaces\Http\Requests\Profile\StoreProfileRequest;
+use App\Interfaces\Http\Requests\Profile\UpdateProfileRequest;
+use App\Interfaces\Http\Resources\ProfileResource;
 use App\Models\Profile;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use OpenApi\Attributes as OA;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        private readonly ListProfilesUseCase $listProfiles,
+        private readonly GetProfileUseCase $getProfile,
+        private readonly CreateProfileUseCase $createProfile,
+        private readonly UpdateProfileUseCase $updateProfile,
+        private readonly DeleteProfileUseCase $deleteProfile,
+    ) {
+    }
+
     #[OA\Get(
         path: '/api/profiles',
         summary: 'Lista os perfis',
@@ -26,11 +44,11 @@ class ProfileController extends Controller
             )
         ]
     )]
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
-        $profiles = Profile::all();
-
-        return response()->json($profiles);
+        return ProfileResource::collection(
+            $this->listProfiles->execute()
+        );
     }
 
     #[OA\Post(
@@ -58,22 +76,16 @@ class ProfileController extends Controller
             )
         ]
     )]
-    public function store(Request $request): JsonResponse
+    public function store(StoreProfileRequest $request): ProfileResource
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ]);
+        $profile = $this->createProfile->execute(
+            $request->validated()
+        );
 
-        $profile = Profile::create([
-            'name' => $validated['name'],
-            'slug' => \Illuminate\Support\Str::slug($validated['name']),
-            'description' => $request->input('description', ''),
-        ]);
-
-        return response()->json($profile, 201);
+        return new ProfileResource($profile);
     }
 
-        #[OA\Get(
+    #[OA\Get(
         path: '/api/profiles/{profile}',
         summary: 'Busca um perfil',
         tags: ['Profiles'],
@@ -104,9 +116,11 @@ class ProfileController extends Controller
             )
         ]
     )]
-    public function show(Profile $profile): JsonResponse
+    public function show(Profile $profile): ProfileResource
     {
-        return response()->json($profile);
+        $profile = $this->getProfile->execute($profile->id);
+
+        return new ProfileResource($profile);
     }
 
     #[OA\Put(
@@ -151,21 +165,15 @@ class ProfileController extends Controller
         ]
     )]
     public function update(
-        Request $request,
+        UpdateProfileRequest $request,
         Profile $profile
-    ): JsonResponse {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'], 
-        ]);
+    ): ProfileResource {
+        $profile = $this->updateProfile->execute(
+            $profile,
+            $request->validated()
+        );
 
-        $profile->update([
-            'name' => $validated['name'],
-            'slug' => \Illuminate\Support\Str::slug($validated['name']),
-            'description' => $request->input('description', $profile->description),
-        ]);
-
-        return response()->json($profile);
+        return new ProfileResource($profile);
     }
 
     #[OA\Delete(
@@ -198,10 +206,10 @@ class ProfileController extends Controller
     )]
     public function destroy(Profile $profile): JsonResponse
     {
-        $profile->delete();
+        $this->deleteProfile->execute($profile);
 
-        return response()->json([
-            'message' => 'Perfil excluído com sucesso.',
-        ]);
+        return response()->json(
+            status: 204
+        );
     }
 }

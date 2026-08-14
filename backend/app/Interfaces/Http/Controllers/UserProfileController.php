@@ -1,16 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Interfaces\Http\Controllers;
+use App\Interfaces\Http\Requests\UserProfile\SyncUserProfileRequest;
+use App\Application\UserProfile\UseCases\SyncUserProfilesUseCase;
 use App\Application\UserProfile\Jobs\DetachUserProfileJob;
+use App\Interfaces\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class UserProfileController extends Controller
 {
-#[OA\Put(
+    public function __construct(
+        private readonly SyncUserProfilesUseCase $syncUserProfilesUseCase
+    ){
+    }
+    #[OA\Put(
         path: '/api/users/{user}/profiles',
         summary: 'Sincroniza os perfis do usuário',
         description: 'Remove os relacionamentos atuais e associa ao usuário os perfis informados.',
@@ -45,25 +50,21 @@ class UserProfileController extends Controller
         ]
     )]
     public function sync(
-        Request $request,
+        SyncUserProfileRequest $request,
         User $user
-    ): JsonResponse {
-        $validated = $request->validate([
-            'profiles' => ['required', 'array'],
-            'profiles.*' => ['integer', 'exists:profiles,id'],
-        ]);
+    ): UserResource {
 
-        $user->profiles()->sync($validated['profiles']);
+        $this->syncUserProfilesUseCase->execute($user, $request->validated()['profiles']);
 
-        return response()->json(
+        return new UserResource(
             $user->load('profiles')
         );
     }
 
-    #[OA\Put(
+    #[OA\Delete(
         path: '/api/users/{user}/profiles',
-        summary: 'Sincroniza os perfis do usuário',
-        description: 'Remove os relacionamentos atuais e associa ao usuário os perfis informados.',
+        summary: 'Desassocia os perfis do usuário',
+        description: 'Remove os relacionamentos atuais do usuário com os perfis informados.',
         tags: ['User Profiles'],
         security: [['sanctum' => []]],
         parameters: [
@@ -95,15 +96,10 @@ class UserProfileController extends Controller
         ]
     )]
     public function detach(
-        Request $request,
+        SyncUserProfileRequest $request,
         User $user
     ): JsonResponse {
-        $validated = $request->validate([
-            'profiles' => ['required', 'array'],
-            'profiles.*' => ['integer', 'exists:profiles,id'],
-        ]);
-
-        foreach ($validated['profiles'] as $profileId) {
+        foreach ($request->validated()['profiles'] as $profileId) {
             DetachUserProfileJob::dispatch($user->id, $profileId);
         }
 
