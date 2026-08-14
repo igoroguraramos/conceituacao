@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import AppModal from '@/components/AppModal.vue'
-import { listUsers, createUser, updateUser, deleteUser, syncUserProfiles, type User } from '@/services/users'
+import { listUsers, createUser, updateUser, deleteUser, syncUserProfiles, detachUserProfile, type User } from '@/services/users'
 import { listProfiles, type Profile } from '@/services/profiles'
 
 defineOptions({
@@ -85,6 +85,13 @@ async function removeUser(user: User) {
     await deleteUser(user.id)
     await loadUsers()
 }
+
+async function removeProfile(user: User, profileId: number) {
+    if (!confirm('Desassociar este perfil do usuário?')) return
+    await detachUserProfile(user.id, profileId)
+    // resposta é 202 (enfileirado) — o profile some da UI só depois do worker processar
+    await loadUsers()
+}
 </script>
 
 <template>
@@ -129,8 +136,11 @@ async function removeUser(user: User) {
                                 <td>{{ user.email }}</td>
                                 <td>
                                     <span v-for="profile in user.profiles" :key="profile.id"
-                                        class="badge bg-primary me-1">
+                                        class="badge bg-primary me-1 d-inline-flex align-items-center">
                                         {{ profile.name }}
+                                        <button v-if="isAdmin" type="button" class="btn-close btn-close-white ms-2"
+                                            style="font-size: 0.6rem;" :aria-label="`Desassociar ${profile.name}`"
+                                            @click="removeProfile(user, profile.id)"></button>
                                     </span>
                                 </td>
                                 <td>

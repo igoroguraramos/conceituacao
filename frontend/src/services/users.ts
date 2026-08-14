@@ -31,3 +31,7 @@ export async function syncUserProfiles(userId: number, profileIds: number[]) {
   const { data } = await api.put<User>(`/users/${userId}/profiles`, { profiles: profileIds })
   return data
 }
+
+export async function detachUserProfile(userId: number, profileId: number) {
+  await api.delete(`/users/${userId}/profiles`, { data: { profiles: [profileId] } })
+}

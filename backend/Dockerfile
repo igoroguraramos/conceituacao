@@ -11,12 +11,18 @@ RUN apk add --no-cache \
     oniguruma-dev \
     libxml2 \
     libxml2-dev \
+    linux-headers \
     && docker-php-ext-install \
     pdo_mysql \
     mbstring \
     bcmath \
     zip \
-    && apk del libzip-dev libpng-dev oniguruma-dev libxml2-dev
+    sockets \
+    && apk del \
+    libzip-dev \
+    libpng-dev \
+    oniguruma-dev \
+    libxml2-dev 
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

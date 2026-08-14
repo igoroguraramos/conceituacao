@@ -26,4 +26,9 @@ Route::middleware(['auth:sanctum', 'profile:admin'])->group(function () {
         '/users/{user}/profiles',
         [UserProfileController::class, 'sync']
     );
+
+    Route::delete(
+        '/users/{user}/profiles',
+        [UserProfileController::class, 'detach']
+    );
 });
