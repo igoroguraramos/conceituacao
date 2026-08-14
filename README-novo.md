@@ -73,7 +73,22 @@ docker exec -it app_backend php artisan key:generate
 ---
 
 ## Como rodar as migrations e seeders
-*(a definir — banco de dados ainda não possui migrations/seeders implementados)*
+
+Com os containers rodando, execute:
+```bash
+docker exec -it app_backend php artisan migrate --seed
+```
+
+Isso cria as tabelas (incluindo `personal_access_tokens`, usada pelo Sanctum) e popula o banco com o usuário de teste via `UserSeeder`.
+
+Se as migrations já tiverem sido rodadas sem seed, é possível rodar só os seeders:
+```bash
+docker exec -it app_backend php artisan db:seed
+```
 
 ## Usuário e senha de teste para login
-*(a definir — autenticação ainda não implementada)*
+
+| Campo    | Valor               |
+|----------|---------------------|
+| E-mail   | `admin@example.com` |
+| Senha    | `password`          |
