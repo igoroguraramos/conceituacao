@@ -1,11 +1,3 @@
-<script setup lang="ts">
-import AuthView from './views/AuthView.vue'
-</script>
-
 <template>
-  <AuthView />
+  <RouterView />
 </template>
-
-<style>
-
-</style>
