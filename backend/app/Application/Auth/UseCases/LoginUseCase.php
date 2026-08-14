@@ -18,6 +18,8 @@ class LoginUseCase
             ]);
         }
 
+        $user->load('profiles');
+
         $user->tokens()->delete();
 
         $token = $user
