@@ -16,16 +16,13 @@ export async function login(email: string, password: string) {
   })
 
   localStorage.setItem('token', data.token)
+  localStorage.setItem('user', JSON.stringify(data.user))
 
   return data
 }
 
 export async function getUser() {
-  const { data } = await api.get('/user')
+  const { data } = await api.get('/users')
 
   return data
-}
-
-export function logout() {
-  localStorage.removeItem('token')
 }

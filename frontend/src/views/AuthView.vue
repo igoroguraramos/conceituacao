@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { login, getUser } from '../services/auth'
+import { login } from '../services/auth'
+import { useRouter } from 'vue-router'
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
-
+const router = useRouter()
 async function handleLogin() {
   error.value = ''
   loading.value = true
@@ -19,9 +20,11 @@ async function handleLogin() {
 
     console.log('Token:', response.token)
 
-    const user = await getUser()
+    const user = response.user
 
     console.log('Usuário autenticado:', user)
+
+    await router.push('/dashboard')
   } catch (e) {
     error.value = (e as Error).message || 'Erro ao realizar login'
   } finally {
