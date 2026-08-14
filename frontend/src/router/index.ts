@@ -46,6 +46,7 @@ const router = createRouter({
           path: 'profiles',
           name: 'profiles',
           component: Profiles,
+          meta: { requiresAdmin: true },
         },
       ],
     },
@@ -58,6 +59,16 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
     next({ name: 'login' })
     return
+  }
+
+  if (to.meta.requiresAdmin) {
+    const user = JSON.parse(localStorage.getItem('user') || 'null')
+    const isAdmin = user?.profiles?.some((p: any) => p.slug === 'admin') ?? false
+
+    if (!isAdmin) {
+      next({ name: 'dashboard' })
+      return
+    }
   }
 
   if (to.name === 'login' && isAuthenticated) {

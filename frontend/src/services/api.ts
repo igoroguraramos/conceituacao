@@ -1,4 +1,5 @@
 import router from '@/router'
+import { useLoadingStore } from '@/stores/loading'
 import axios from 'axios'
 
 const api = axios.create({
@@ -10,6 +11,8 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
+  useLoadingStore().start()
+
   const token = localStorage.getItem('token')
 
   if (token) {
@@ -20,13 +23,17 @@ api.interceptors.request.use((config) => {
 })
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    useLoadingStore().stop()
+    return response
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       router.push({ name: 'login' })
     }
+    useLoadingStore().stop()
     return Promise.reject(error)
   },
 )

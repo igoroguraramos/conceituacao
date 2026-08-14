@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterView, RouterLink, useRouter } from 'vue-router'
+import { useLoadingStore } from '@/stores/loading'
+
+const loadingStore = useLoadingStore()
 
 const router = useRouter()
 
@@ -16,63 +19,50 @@ function getUser() {
   const user = localStorage.getItem('user')
   return user ? JSON.parse(user) : null
 }
+
+const isAdmin = getUser()?.profiles?.some((p: any) => p.slug === 'admin') ?? false
 </script>
 
 <template>
   <div class="dashboard-layout">
+    <div v-if="loadingStore.isLoading" class="global-loading-overlay">
+      <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
 
     <!-- Sidebar -->
-    <aside
-      class="sidebar"
-      :class="{ 'sidebar-open': sidebarOpen }"
-    >
+    <aside class="sidebar" :class="{ 'sidebar-open': sidebarOpen }">
       <div class="sidebar-header">
         <h4 class="mb-0 fw-bold">
           Gestão de Usuários
         </h4>
 
-        <button
-          class="btn-close d-lg-none"
-          @click="sidebarOpen = false"
-        />
+        <button class="btn-close d-lg-none" @click="sidebarOpen = false" />
       </div>
 
       <nav class="sidebar-nav">
 
-        <RouterLink
-          to="/dashboard"
-          class="nav-item"
-          @click="sidebarOpen = false"
-        >
+        <RouterLink to="/dashboard" class="nav-item" @click="sidebarOpen = false">
           <span class="icon">📊</span>
           <span>Dashboard</span>
         </RouterLink>
 
-        <RouterLink
-          to="/users"
-          class="nav-item"
-          @click="sidebarOpen = false"
-        >
+        <RouterLink to="/users" class="nav-item" @click="sidebarOpen = false">
           <span class="icon">👤</span>
           <span>Usuários</span>
         </RouterLink>
 
-        <RouterLink
-          to="/profiles"
-          class="nav-item"
-          @click="sidebarOpen = false"
-        >
+        <RouterLink v-if="isAdmin" to="/profiles" class="nav-item" @click="sidebarOpen = false">
           <span class="icon">🛡️</span>
           <span>Profiles</span>
         </RouterLink>
 
+
       </nav>
 
       <div class="sidebar-footer">
-        <button
-          class="logout-button"
-          @click="logout"
-        >
+        <button class="logout-button" @click="logout">
           <span class="icon">🚪</span>
           <span>Sair</span>
         </button>
@@ -80,11 +70,7 @@ function getUser() {
     </aside>
 
     <!-- Overlay mobile -->
-    <div
-      v-if="sidebarOpen"
-      class="sidebar-overlay d-lg-none"
-      @click="sidebarOpen = false"
-    />
+    <div v-if="sidebarOpen" class="sidebar-overlay d-lg-none" @click="sidebarOpen = false" />
 
     <!-- Main -->
     <div class="main-content">
@@ -92,10 +78,7 @@ function getUser() {
       <!-- Header -->
       <header class="topbar">
 
-        <button
-          class="btn btn-light d-lg-none"
-          @click="sidebarOpen = true"
-        >
+        <button class="btn btn-light d-lg-none" @click="sidebarOpen = true">
           ☰
         </button>
 
@@ -320,4 +303,22 @@ function getUser() {
     padding: 20px;
   }
 }
+
+.global-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.global-loading-overlay .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
 </style>
