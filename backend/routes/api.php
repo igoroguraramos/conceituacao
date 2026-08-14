@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/hello', function () {
@@ -10,8 +12,18 @@ Route::get('/hello', function () {
     ]);
 });
 
-Route::get('/user', function (Request $request) {
-    return $request->user()->load('profiles');
-})->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('users', UserController::class);
+});
 
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware(['auth:sanctum', 'profile:admin'])->group(function () {
+
+    Route::apiResource('profiles', ProfileController::class);
+
+    Route::put(
+        '/users/{user}/profiles',
+        [UserProfileController::class, 'sync']
+    );
+});
