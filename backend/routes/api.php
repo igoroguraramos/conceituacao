@@ -6,17 +6,12 @@ use App\Interfaces\Http\Controllers\UserProfileController;
 use App\Interfaces\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/hello', function () {
-    return response()->json([
-        'message' => 'Olá, Vue 3!',
-    ]);
-});
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
-
-Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum', 'profile:admin'])->group(function () {
 

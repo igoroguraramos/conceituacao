@@ -1,16 +1,20 @@
 <?php
 
 namespace App\Interfaces\Http\Controllers;
+
 use App\Application\Auth\UseCases\LoginUseCase;
+use App\Application\Auth\UseCases\LogoutUseCase;
 use App\Interfaces\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
     public function __construct(
-        private readonly LoginUseCase $loginUseCase
+        private readonly LoginUseCase $loginUseCase,
+        private readonly LogoutUseCase $logoutUseCase,
+
     ) {}
 
     #[OA\Post(
@@ -44,14 +48,20 @@ class AuthController extends Controller
     )]
     public function login(LoginRequest $request): JsonResponse
     {
-        Log::info('Login request received', [
-            'email' => $request->validated('email'),
-        ]);
         $result = $this->loginUseCase->execute(
             email: $request->validated('email'),
             password: $request->validated('password'),
         );
 
         return response()->json($result);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $this->logoutUseCase->execute($request);
+
+        return response()->json([
+            'message' => 'Logout realizado com sucesso.',
+        ]);
     }
 }

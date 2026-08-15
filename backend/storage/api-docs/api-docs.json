@@ -13,7 +13,7 @@
                 ],
                 "summary": "Realiza o login",
                 "description": "Autentica o usuário e retorna o token de acesso.",
-                "operationId": "a3b306d14572d1f4bd6c064b3233e7b8",
+                "operationId": "8ae85934dce4e722ab7a8860c282566b",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -50,7 +50,7 @@
                     "Profiles"
                 ],
                 "summary": "Lista os perfis",
-                "operationId": "43d12304c3e621ecce8cc9ccd4b3738e",
+                "operationId": "5411ff0e67c9278b13dc513c77ee6ae5",
                 "responses": {
                     "200": {
                         "description": "Lista de perfis",
@@ -77,7 +77,7 @@
                     "Profiles"
                 ],
                 "summary": "Cria um perfil",
-                "operationId": "00abb5f24a20112b161d17e9a5c38a37",
+                "operationId": "b3832b28563627440a90b296de1b6cbe",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -116,7 +116,7 @@
                     "Profiles"
                 ],
                 "summary": "Busca um perfil",
-                "operationId": "83d9b96185bae23c5b0a39be5b9681e7",
+                "operationId": "441aae5d606c057396cc8380da8b5289",
                 "parameters": [
                     {
                         "name": "profile",
@@ -155,7 +155,7 @@
                     "Profiles"
                 ],
                 "summary": "Atualiza um perfil",
-                "operationId": "d287a4ee84dddce8a10e8dccba4c0ddf",
+                "operationId": "3c97fdc4bc2c39b1fe190e68273495f8",
                 "parameters": [
                     {
                         "name": "profile",
@@ -207,7 +207,7 @@
                     "Profiles"
                 ],
                 "summary": "Exclui um perfil",
-                "operationId": "5eb02443a95a4b74b56882493efb5017",
+                "operationId": "11905053476d0003d0296e4cb8c84e57",
                 "parameters": [
                     {
                         "name": "profile",
@@ -241,7 +241,7 @@
                     "Users"
                 ],
                 "summary": "Lista os usuários",
-                "operationId": "c457726701591d1183b53aa71fc13441",
+                "operationId": "e2c5379fe9db8255024983733794aafa",
                 "responses": {
                     "200": {
                         "description": "Lista de usuários",
@@ -268,7 +268,7 @@
                     "Users"
                 ],
                 "summary": "Cria um usuário",
-                "operationId": "592819a0265360b2014512d6dbfaf0e7",
+                "operationId": "b2f4f844905102c40b597b49e7f522eb",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -304,7 +304,7 @@
                     "Users"
                 ],
                 "summary": "Busca um usuário",
-                "operationId": "d3a14968f8b7a072620c75c7c78ed6f8",
+                "operationId": "74fbf4c2c771b62002d1353846008e12",
                 "parameters": [
                     {
                         "name": "user",
@@ -340,7 +340,7 @@
                     "Users"
                 ],
                 "summary": "Atualiza um usuário",
-                "operationId": "e29fc231c7937ab09483d35e6e3d1214",
+                "operationId": "724c3d7cc8889b1042229fd5400ed2da",
                 "parameters": [
                     {
                         "name": "user",
@@ -392,7 +392,7 @@
                     "Users"
                 ],
                 "summary": "Exclui um usuário",
-                "operationId": "e0f9a385a1d6788b99e519bd98cf7239",
+                "operationId": "deaa476c2229eee7a5a2208c2ca30efd",
                 "parameters": [
                     {
                         "name": "user",
@@ -427,7 +427,7 @@
                 ],
                 "summary": "Sincroniza os perfis do usuário",
                 "description": "Remove os relacionamentos atuais e associa ao usuário os perfis informados.",
-                "operationId": "f5882157b44eafe5b1f95fd526e08079",
+                "operationId": "fde19edf05204061b46b3d896230ad10",
                 "parameters": [
                     {
                         "name": "user",
@@ -453,6 +453,53 @@
                 "responses": {
                     "200": {
                         "description": "Perfis sincronizados com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User Profiles"
+                ],
+                "summary": "Desassocia os perfis do usuário",
+                "description": "Remove os relacionamentos atuais do usuário com os perfis informados.",
+                "operationId": "ea0406910760f877f965ef8970c51d1d",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserProfileSyncRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Desassociação enfileirada com sucesso.",
                         "content": {
                             "application/json": {
                                 "schema": {

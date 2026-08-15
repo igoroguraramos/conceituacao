@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { RouterView, RouterLink, useRouter } from 'vue-router'
 import { useLoadingStore } from '@/stores/loading'
+import { logout as logoutRequest } from '@/services/auth'
 
 const loadingStore = useLoadingStore()
 
@@ -9,10 +10,12 @@ const router = useRouter()
 
 const sidebarOpen = ref(false)
 
-function logout() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  router.push('/login')
+async function logout() {
+  try {
+    await logoutRequest()
+  } finally {
+    router.push('/login')
+  }
 }
 
 function getUser() {

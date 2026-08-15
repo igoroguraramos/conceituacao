@@ -26,3 +26,9 @@ export async function getUser() {
 
   return data
 }
+
+export async function logout() {
+  await api.post('/logout')
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+}
