@@ -12,8 +12,10 @@ RUN apk add --no-cache \
     libxml2 \
     libxml2-dev \
     linux-headers \
+    sqlite-dev \
     && docker-php-ext-install \
     pdo_mysql \
+    pdo_sqlite \
     mbstring \
     bcmath \
     zip \
@@ -23,7 +25,7 @@ RUN apk add --no-cache \
     libpng-dev \
     oniguruma-dev \
     libxml2-dev 
-
+    
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
