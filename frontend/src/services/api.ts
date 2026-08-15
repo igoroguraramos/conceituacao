@@ -1,5 +1,6 @@
 import router from '@/router'
 import { useLoadingStore } from '@/stores/loading'
+import { useToastStore } from '@/stores/toast'
 import axios from 'axios'
 
 const api = axios.create({
@@ -32,6 +33,8 @@ api.interceptors.response.use(
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       router.push({ name: 'login' })
+    } else {
+      useToastStore().error(error.response?.data?.message || 'Ocorreu um erro inesperado.')
     }
     useLoadingStore().stop()
     return Promise.reject(error)

@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import AppModal from '@/components/AppModal.vue'
 import { listUsers, createUser, updateUser, deleteUser, syncUserProfiles, detachUserProfile, type User } from '@/services/users'
 import { listProfiles, type Profile } from '@/services/profiles'
+import { useToastStore } from '@/stores/toast'
+
 
 defineOptions({
     name: 'UsersView',
@@ -12,6 +14,7 @@ const users = ref<User[]>([])
 const allProfiles = ref<Profile[]>([])
 const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
 const isAdmin = currentUser?.profiles?.some((p: Profile) => p.slug === 'admin') ?? false
+const toast = useToastStore()
 
 async function loadUsers() {
     users.value = await listUsers()
@@ -25,7 +28,6 @@ onMounted(async () => {
     await Promise.all([loadUsers(), loadAllProfiles()])
 })
 
-// --- criar/editar usuário ---
 const showUserModal = ref(false)
 const editingUser = ref<User | null>(null)
 const userForm = ref({ name: '', email: '', password: '' })
@@ -49,12 +51,11 @@ async function submitUser() {
     userFormError.value = ''
     try {
         if (editingUser.value) {
-            await updateUser(editingUser.value.id, {
-                name: userForm.value.name,
-                email: userForm.value.email,
-            })
+            await updateUser(editingUser.value.id, { name: userForm.value.name, email: userForm.value.email })
+            toast.success('Usuário atualizado com sucesso.')
         } else {
             await createUser(userForm.value)
+            toast.success('Usuário criado com sucesso.')
         }
         showUserModal.value = false
         await loadUsers()
@@ -76,6 +77,7 @@ function openLinkModal(user: User) {
 async function submitLinkProfiles() {
     if (!linkingUser.value) return
     await syncUserProfiles(linkingUser.value.id, selectedProfileIds.value)
+    toast.success('Perfis atualizados com sucesso.')
     showLinkModal.value = false
     await loadUsers()
 }
@@ -83,14 +85,17 @@ async function submitLinkProfiles() {
 async function removeUser(user: User) {
     if (!confirm(`Excluir o usuário "${user.name}"?`)) return
     await deleteUser(user.id)
+    toast.success('Usuário excluído com sucesso.')
     await loadUsers()
 }
 
 async function removeProfile(user: User, profileId: number) {
     if (!confirm('Desassociar este perfil do usuário?')) return
     await detachUserProfile(user.id, profileId)
-    // resposta é 202 (enfileirado) — o profile some da UI só depois do worker processar
-    await loadUsers()
+    // remoção otimista: o job roda assíncrono no worker, então atualizamos a UI
+    // na hora em vez de esperar um reload (que poderia trazer o dado antigo de volta)
+    user.profiles = user.profiles.filter((p) => p.id !== profileId)
+    toast.success('Perfil desassociado.')
 }
 </script>
 
