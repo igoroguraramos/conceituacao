@@ -56,6 +56,32 @@ class AuthController extends Controller
         return response()->json($result);
     }
 
+    #[OA\Post(
+        path: '/api/logout',
+        summary: 'Realiza o logout',
+        description: 'Revoga o token de acesso atual do usuário autenticado.',
+        tags: ['Auth'],
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Logout realizado com sucesso',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Logout realizado com sucesso.'
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.'
+            )
+        ]
+    )]
     public function logout(Request $request): JsonResponse
     {
         $this->logoutUseCase->execute($request);
