@@ -25,8 +25,8 @@ async function handleLogin() {
     console.log('Usuário autenticado:', user)
 
     await router.push('/dashboard')
-  } catch (e) {
-    error.value = (e as Error).message || 'Erro ao realizar login'
+  } catch (e: any) {
+    error.value = e.response?.data?.message || 'Erro ao realizar login'
   } finally {
     loading.value = false
   }
@@ -51,59 +51,29 @@ async function handleLogin() {
         <form @submit.prevent="handleLogin">
 
           <div class="mb-3">
-            <label
-              for="email"
-              class="form-label"
-            >
+            <label for="email" class="form-label">
               E-mail
             </label>
 
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              class="form-control form-control-lg"
-              placeholder="seu@email.com"
-              required
-            />
+            <input id="email" v-model="email" type="email" class="form-control form-control-lg"
+              placeholder="seu@email.com" required />
           </div>
 
           <div class="mb-4">
-            <label
-              for="password"
-              class="form-label"
-            >
+            <label for="password" class="form-label">
               Senha
             </label>
 
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              class="form-control form-control-lg"
-              placeholder="Digite sua senha"
-              required
-            />
+            <input id="password" v-model="password" type="password" class="form-control form-control-lg"
+              placeholder="Digite sua senha" required />
           </div>
 
-          <div
-            v-if="error"
-            class="alert alert-danger"
-            role="alert"
-          >
+          <div v-if="error" class="alert alert-danger" role="alert">
             {{ error }}
           </div>
 
-          <button
-            type="submit"
-            class="btn btn-primary btn-lg w-100"
-            :disabled="loading"
-          >
-            <span
-              v-if="loading"
-              class="spinner-border spinner-border-sm me-2"
-              aria-hidden="true"
-            ></span>
+          <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="loading">
+            <span v-if="loading" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
 
             {{ loading ? 'Entrando...' : 'Entrar' }}
           </button>

@@ -17,19 +17,19 @@ onMounted(loadProfiles)
 
 const showModal = ref(false)
 const editingProfile = ref<Profile | null>(null)
-const form = ref({ name: '', description: '' })
+const form = ref({ name: '', slug: '', description: '' })
 const formError = ref('')
 
 function openCreateModal() {
     editingProfile.value = null
-    form.value = { name: '', description: '' }
+    form.value = { name: '', slug: '', description: '' }
     formError.value = ''
     showModal.value = true
 }
 
 function openEditModal(profile: Profile) {
     editingProfile.value = profile
-    form.value = { name: profile.name, description: profile.description ?? '' }
+    form.value = { name: profile.name, slug: profile.slug, description: profile.description ?? '' }
     formError.value = ''
     showModal.value = true
 }
@@ -54,6 +54,26 @@ async function removeProfile(profile: Profile) {
     await deleteProfile(profile.id)
     await loadProfiles()
 }
+
+function slugify(text: string) {
+    return text
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+}
+
+const slugManuallyEdited = ref(false)
+
+function onNameInput() {
+    if (!slugManuallyEdited.value) {
+        form.value.slug = slugify(form.value.name)
+    }
+}
+
+function onSlugInput() {
+    slugManuallyEdited.value = true
+}
 </script>
 
 <template>
@@ -76,69 +96,74 @@ async function removeProfile(profile: Profile) {
         </div>
 
 
-    <AppModal :show="showModal" :title="editingProfile ? 'Editar profile' : 'Novo profile'" @close="showModal = false">
-        <form @submit.prevent="submitProfile">
-            <div class="mb-3">
-                <label class="form-label">Nome</label>
-                <input v-model="form.name" type="text" class="form-control" required />
+        <AppModal :show="showModal" :title="editingProfile ? 'Editar profile' : 'Novo profile'"
+            @close="showModal = false">
+            <form @submit.prevent="submitProfile">
+                <div class="mb-3">
+                    <label class="form-label">Nome</label>
+                    <input v-model="form.name" type="text" class="form-control" required @input="onNameInput" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Slug</label>
+                    <input v-model="form.slug" type="text" class="form-control" required @input="onSlugInput" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descrição</label>
+                    <textarea v-model="form.description" class="form-control"></textarea>
+                </div>
+                <div v-if="formError" class="alert alert-danger">{{ formError }}</div>
+            </form>
+
+            <template #footer>
+                <button class="btn btn-secondary" @click="showModal = false">Cancelar</button>
+                <button class="btn btn-primary" @click="submitProfile">Salvar</button>
+            </template>
+        </AppModal>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Descrição</th>
+                                <th>Usuários</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr v-for="profile in profiles" :key="profile.id">
+                                <td>{{ profile.id }}</td>
+
+                                <td>
+                                    <strong>{{ profile.name }}</strong>
+                                </td>
+
+                                <td>
+                                    {{ profile.description }}
+                                </td>
+
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-2" @click="openEditModal(profile)">
+                                        Editar
+                                    </button>
+
+                                    <button class="btn btn-sm btn-outline-danger" @click="removeProfile(profile)">
+                                        Excluir
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
-            <div class="mb-3">
-                <label class="form-label">Descrição</label>
-                <textarea v-model="form.description" class="form-control"></textarea>
-            </div>
-            <div v-if="formError" class="alert alert-danger">{{ formError }}</div>
-        </form>
-
-        <template #footer>
-            <button class="btn btn-secondary" @click="showModal = false">Cancelar</button>
-            <button class="btn btn-primary" @click="submitProfile">Salvar</button>
-        </template>
-    </AppModal>
-
-    <div class="card border-0 shadow-sm">
-        <div class="card-body">
-
-            <div class="table-responsive">
-                <table class="table align-middle">
-
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Descrição</th>
-                            <th>Usuários</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr v-for="profile in profiles" :key="profile.id">
-                            <td>{{ profile.id }}</td>
-
-                            <td>
-                                <strong>{{ profile.name }}</strong>
-                            </td>
-
-                            <td>
-                                {{ profile.description }}
-                            </td>
-
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary me-2" @click="openEditModal(profile)">
-                                    Editar
-                                </button>
-
-                                <button class="btn btn-sm btn-outline-danger" @click="removeProfile(profile)">
-                                    Excluir
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
         </div>
-    </div>
 
     </div>
 </template>

@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Interfaces\Http\Controllers;
-use OpenApi\Attributes as OA;
 use App\Application\Auth\UseCases\LoginUseCase;
-use App\Http\Requests\Auth\LoginRequest;
+use App\Interfaces\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {

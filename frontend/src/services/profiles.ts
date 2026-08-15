@@ -12,12 +12,12 @@ export async function listProfiles() {
   return data
 }
 
-export async function createProfile(payload: { name: string; description?: string }) {
+export async function createProfile(payload: { name: string; slug: string; description?: string }) {
   const { data } = await api.post<Profile>('/profiles', payload)
   return data
 }
 
-export async function updateProfile(id: number, payload: { name: string; description?: string }) {
+export async function updateProfile(id: number, payload: { name: string; slug: string; description?: string }) {
   const { data } = await api.put<Profile>(`/profiles/${id}`, payload)
   return data
 }

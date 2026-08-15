@@ -1,9 +1,12 @@
 <?php
 
+use App\Domain\Profile\Exceptions\SlugAlreadyInUseException;
+use App\Domain\User\Exceptions\EmailAlreadyInUseException;
+use App\Http\Middleware\EnsureUserHasProfile;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\EnsureUserHasProfile;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,5 +21,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (EmailAlreadyInUseException|SlugAlreadyInUseException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+        });
+
+            $exceptions->render(function (QueryException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => 'Erro ao acessar o banco de dados.'], 500);
+            }
+        });
     })->create();
