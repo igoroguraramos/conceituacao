@@ -10,6 +10,7 @@ use App\Infrastructure\Persistence\Eloquent\EloquentUserProfileRepository;
 use App\Infrastructure\Persistence\Eloquent\EloquentUserRepository;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Middleware\Authenticate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,5 +39,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         JsonResource::withoutWrapping();
+
+        Authenticate::redirectUsing(fn () => null);
     }
 }

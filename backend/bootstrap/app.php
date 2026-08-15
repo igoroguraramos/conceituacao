@@ -2,10 +2,10 @@
 
 use App\Domain\Profile\Exceptions\SlugAlreadyInUseException;
 use App\Domain\User\Exceptions\EmailAlreadyInUseException;
-use App\Http\Middleware\EnsureUserHasProfile;
+use App\Interfaces\Http\Middleware\EnsureUserHasProfile;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
